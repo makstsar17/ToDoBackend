@@ -1,7 +1,9 @@
+import os
 
 from flask import request, jsonify, Blueprint
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from .models import TasksModel, SubTaskModel, TagsModel
+from util.file_util import UPLOAD_FOLDER_TEMPORARY, relocate_new_files
 
 tasks_manager = Blueprint('tasks', __name__, url_prefix='/tasks')
 
@@ -54,6 +56,10 @@ def add_task():
 
         if not add_tag_res:
             return jsonify({"error": "Can't add tags to database"}), 500
+
+    if str(current_user) in os.listdir(UPLOAD_FOLDER_TEMPORARY) and \
+            os.listdir(os.path.join(UPLOAD_FOLDER_TEMPORARY, str(current_user))):
+        relocate_new_files(current_user, task_id)
 
     return jsonify({"success": True}), 200
 

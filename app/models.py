@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from util.file_util import get_filenames, delete_files_for_task
 from enum import Enum
 
 db = SQLAlchemy()
@@ -102,6 +103,7 @@ class TasksModel(db.Model):
                     "suff_time": task.suff_time,
                     "notes": task.notes,
                     "status": task.status,
+                    "files": get_filenames(task.id),
                     "subtasks": SubTaskModel.get_subtasks(task.id),
                     "tags": TagsModel.get_tags(task.id)}
 
@@ -127,6 +129,7 @@ class TasksModel(db.Model):
 
         TagsModel.delete_tags(task_id)
         SubTaskModel.delete_subtasks(task_id)
+        delete_files_for_task(task_id)
 
         db.session.delete(task)
         db.session.commit()

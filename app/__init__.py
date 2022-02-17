@@ -21,4 +21,10 @@ def create_app(test_config=None):
     from .auth import authentication as auth
     app.register_blueprint(auth)
 
+    from .tasks import tasks_manager
+    app.register_blueprint(tasks_manager)
+
+    from .file_manager import file_manager
+    app.register_blueprint(file_manager)
+
     return app
