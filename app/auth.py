@@ -6,20 +6,22 @@ from flask_jwt_extended import (create_access_token, jwt_required, create_refres
                                 get_jwt_identity, get_jwt)
 from instance.config import JWT_ACCESS_TOKEN_EXPIRES, JWT_REFRESH_TOKEN_EXPIRES
 
+
 authentication = Blueprint('authentication', __name__, url_prefix='/auth')
 
 
 @authentication.route('/signup', methods=["POST"])
 def signup():
     try:
-        email = request.json["email"]
-        email = email.lower()
-        password = request.json["password"]
+        if "email" in request.json and "password" in request.json:
+            email = request.json["email"]
+            email = email.lower()
 
-        if not password or not email:
+            password = request.json["password"]
+        else:
             return jsonify({"error": "Invalid form"}), 400
 
-        user = list(filter(lambda user: user["email"] == email, UserModel.getUsers()))
+        user = list(filter(lambda user_object: user_object["email"] == email, UserModel.getUsers()))
         if len(user) != 0:
             return jsonify({"error": "Account with such email has already existed"}), 400
 
@@ -30,20 +32,21 @@ def signup():
         return jsonify({"success": True}), 201
 
     except Exception as e:
-        return jsonify({"error": e}), 500
+        return jsonify({"error": str(e)}), 500
 
 
 @authentication.route('/signin', methods=["POST"])
 def signin():
     try:
-        email = request.json["email"]
-        password = request.json["password"]
-
-        if not password or not email:
+        if "email" in request.json and "password" in request.json:
+            email = request.json["email"]
+            password = request.json["password"]
+        else:
             return jsonify({"error": "Invalid form"}), 400
 
-        user = list(filter(lambda user: user["email"] == email and
-                                        UserModel.verify_password(user["password"], password), UserModel.getUsers()))
+        user = list(filter(lambda user_object: user_object["email"] == email and
+                           UserModel.verify_password(user_object["password"], password),
+                           UserModel.getUsers()))
         if len(user) == 1:
             token = create_access_token(identity=user[0]["id"])
             refresh_token = create_refresh_token(identity=user[0]["id"])
@@ -54,7 +57,7 @@ def signin():
             return jsonify({"error": "Incorrect email or password"}), 400
 
     except Exception as e:
-        return jsonify({"error": e}), 500
+        return jsonify({"error": str(e)}), 500
 
 
 @authentication.route('/checktoken', methods=["GET"])
@@ -82,7 +85,7 @@ def access_logout():
         return jsonify({"success": True}), 200
 
     except Exception as e:
-        return jsonify({"error": e}), 500
+        return jsonify({"error": str(e)}), 500
 
 
 @authentication.route('/logout/refresh', methods=["POST"])
@@ -94,4 +97,4 @@ def refresh_logout():
         return jsonify({"success": True}), 200
 
     except Exception as e:
-        return jsonify({"error": e}), 500
+        return jsonify({"error": str(e)}), 500
