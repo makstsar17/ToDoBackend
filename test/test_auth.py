@@ -3,27 +3,25 @@ import pytest
 
 
 def test_register(client):
-    data = {"username": "username", "email": "email@email.com", "password": "password"}
+    data = {"email": "email@email.com", "password": "password"}
     response = client.post('/auth/signup', json=data)
     assert response.status_code == 201
     assert response.get_json()["success"]
 
-    assert list(filter(lambda user: user["username"] == "username" and
-                                    user["email"] == "email" and
+    assert list(filter(lambda user: user["email"] == "email" and
                                     UserModel.verify_password(user["password"], "password"), UserModel.getUsers())) \
            is not None
 
 
 @pytest.mark.parametrize(
-    ("username", "email", "password"),
+    ("email", "password"),
     (
-        ("", "mail@gmail.com", "password"),
-        ("username", "", "password"),
-        ("username1", "t@t.t", "password")
+        ("", "password"),
+        ("t@t.t", "password")
     ),
 )
-def test_register_with_invalid_data(client, username, email, password):
-    response = client.post('/auth/signup', json={"username": username, "email": email, "password": password})
+def test_register_with_invalid_data(client, email, password):
+    response = client.post('/auth/signup', json={"email": email, "password": password})
     assert response.status_code == 400
     assert "error" in response.get_json().keys()
 

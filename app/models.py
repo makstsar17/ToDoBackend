@@ -8,12 +8,10 @@ class UserModel(db.Model):
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    username = db.Column(db.String(64), unique=True, nullable=False)
     email = db.Column(db.String(64), unique=True, nullable=False)
     _pwd = db.Column(db.String(225), nullable=False)
 
-    def __init__(self, username, email, pwd):
-        self.username = username
+    def __init__(self, email, pwd):
         self.email = email
         self._pwd = pwd
 
@@ -22,7 +20,6 @@ class UserModel(db.Model):
         def to_json(user_object):
             return {
                 "id": user_object.id,
-                "username": user_object.username,
                 "email": user_object.email,
                 "password": user_object._pwd
             }
@@ -33,9 +30,9 @@ class UserModel(db.Model):
         return cls.query.filter_by(id=id).first()
 
     @classmethod
-    def addUser(cls, username, email, password):
+    def addUser(cls, email, password):
         try:
-            user = cls(username, email, generate_password_hash(password))
+            user = cls(email, generate_password_hash(password))
             db.session.add(user)
             db.session.commit()
             return True

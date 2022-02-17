@@ -35,7 +35,7 @@ def client(app_for_testing):
 def client_with_user(app_for_testing):
     with app_for_testing.test_client() as client:
         with app_for_testing.app_context():
-            UserModel.addUser("username", "mail@mail.com", "password")
+            UserModel.addUser("mail@mail.com", "password")
             yield client
             db.session.query(UserModel).delete()
             db.session.commit()

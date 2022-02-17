@@ -15,9 +15,8 @@ def signup():
         email = request.json["email"]
         email = email.lower()
         password = request.json["password"]
-        username = request.json["username"]
 
-        if not password or not email or not username:
+        if not password or not email:
             return jsonify({"error": "Invalid form"}), 400
 
         user = list(filter(lambda user: user["email"] == email, UserModel.getUsers()))
@@ -27,7 +26,7 @@ def signup():
         if not re.match(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', email):
             return jsonify({"error": "Invalid form of email"}), 400
         # TODO make checking email for existing
-        UserModel.addUser(username, email, password)
+        UserModel.addUser(email, password)
         return jsonify({"success": True}), 201
 
     except Exception as e:
